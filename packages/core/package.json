@@ -5,6 +5,9 @@
   "author": "UOrb <798008773@qq.com>",
   "homepage": "",
   "license": "ISC",
+  "bin": {
+    "weilai-cli": "bin/index.js"
+  },
   "main": "lib/core.js",
   "directories": {
     "lib": "lib",
