@@ -1,6 +1,6 @@
 {
   "name": "@weilai-cli/core",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "weilai-cli core",
   "author": "UOrb <798008773@qq.com>",
   "homepage": "",
@@ -20,6 +20,6 @@
     "test": "echo \"Error: run tests from root\""
   },
   "dependencies": {
-    "@weilai-cli/utils": "^1.0.0"
+    "@weilai-cli/utils": "^0.0.1"
   }
 }
