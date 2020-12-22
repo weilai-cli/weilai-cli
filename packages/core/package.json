@@ -1,6 +1,6 @@
 {
   "name": "@weilai-cli/core",
-  "version": "0.0.2",
+  "version": "1.0.0",
   "description": "weilai-cli core",
   "author": "UOrb <798008773@qq.com>",
   "homepage": "",
@@ -17,7 +17,7 @@
     "lib"
   ],
   "publishConfig": {
-    "registry": "http://81.68.79.84:4873/"
+    "access": "public"
   },
   "scripts": {
     "test": "echo \"Error: run tests from root\""
