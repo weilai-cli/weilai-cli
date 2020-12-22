@@ -1,0 +1,22 @@
+{
+  "name": "@weilai-cli/utils",
+  "version": "1.0.0",
+  "description": "weilai-cli utils",
+  "author": "UOrb <798008773@qq.com>",
+  "homepage": "",
+  "license": "ISC",
+  "main": "lib/index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "publishConfig": {
+    "registry": "http://81.68.79.84:4873/"
+  },
+  "scripts": {
+    "test": "echo \"Error: run tests from root\""
+  }
+}
