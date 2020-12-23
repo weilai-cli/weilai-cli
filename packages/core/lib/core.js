@@ -3,7 +3,7 @@
 const dedent = require("dedent")
 const log = require("npmlog")
 const yargs = require("yargs/yargs")
-const pkg = require("./package.json")
+const pkg = require("../package.json")
 
 module.exports = core
 
