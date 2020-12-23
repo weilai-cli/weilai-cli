@@ -1,3 +1,12 @@
 #! /usr/bin/env node
 
-console.log('撒 来细数你的罪过吧！')
+"use strict"
+
+const importLocal = require('import-local')
+
+if(importLocal(__filename)) {
+    require('npmlog')
+        .info('cli', 'using local version of weilai-cli')
+} else {
+    require('../lib/core')(process.argv.slice(2))
+}

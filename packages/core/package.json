@@ -23,6 +23,8 @@
     "test": "echo \"Error: run tests from root\""
   },
   "dependencies": {
-    "@weilai-cli/utils": "^0.0.2"
+    "@weilai-cli/utils": "file:../utils",
+    "import-local": "^3.0.2",
+    "npmlog": "^4.1.2"
   }
 }
