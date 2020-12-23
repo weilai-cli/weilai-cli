@@ -11,9 +11,5 @@
   "license": "ISC",
   "devDependencies": {
     "lerna": "^3.22.1"
-  },
-  "dependencies": {
-    "dedent": "^0.7.0",
-    "yargs": "^16.2.0"
   }
 }
