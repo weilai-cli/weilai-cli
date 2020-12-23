@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "@weilai-cli/utils": "file:../utils",
+    "dedent": "^0.7.0",
     "import-local": "^3.0.2",
     "npmlog": "^4.1.2"
   }
