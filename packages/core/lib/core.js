@@ -8,7 +8,7 @@ const pkg = require("../package.json")
 module.exports = core
 
 function core(argv) {
-    const cli = yargs(argv)
+    const cli = yargs()
 
     const context = {
         weilaiCliVersion: pkg.version,
@@ -31,4 +31,5 @@ function core(argv) {
                 求内推！
             `
         )
+        .parse(argv, context)
 }
