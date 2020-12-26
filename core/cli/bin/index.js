@@ -6,7 +6,7 @@ const importLocal = require('import-local')
 
 if(importLocal(__filename)) {
     require('npmlog')
-        .info('cli', 'using local version of weilai-cli')
+        .info('cli', '使用的本地的 weilai-cli')
 } else {
-    require('../lib/core')(process.argv.slice(2))
+    require('../lib')(process.argv.slice(2))
 }
