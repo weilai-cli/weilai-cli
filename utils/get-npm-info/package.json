@@ -1,6 +1,6 @@
 {
   "name": "@weilai-cli/get-npm-info",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "weilai-cli get-npm-info",
   "keywords": [
     "get-npm-info"
