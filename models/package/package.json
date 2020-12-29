@@ -24,8 +24,12 @@
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
   "dependencies": {
-    "@weilai-cli/utils": "file:../../utils/utils",
     "@weilai-cli/format-path": "file:../../utils/format-path",
+    "@weilai-cli/get-npm-info": "file:../../utils/get-npm-info",
+    "@weilai-cli/utils": "file:../../utils/utils",
+    "fs-extra": "^9.0.1",
+    "npminstall": "^4.10.0",
+    "path-exists": "^4.0.0",
     "pkg-dir": "^5.0.0"
   }
 }

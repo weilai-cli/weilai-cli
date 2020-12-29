@@ -34,6 +34,7 @@ async function core(argv) {
         registerCommand()
     } catch(error) {
         log.error(error.message)
+        log.verbose('error', error)
     }
 }
 
@@ -76,7 +77,7 @@ function registerCommand() {
     // 当没有命令和配置的时候打印帮助文档
     if(program.args && program.args.length < 1) {
         program.outputHelp()
-        console.log()
+        console.log() // 换行
     }
 
     log.verbose('args', program.args)
