@@ -1,0 +1,30 @@
+{
+  "name": "@weilai-cli/exec",
+  "version": "1.0.11",
+  "description": "weilai-cli exec",
+  "author": "UOrb <798008773@qq.com>",
+  "homepage": "",
+  "license": "ISC",
+  "main": "lib/index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://gitee.com/UltramanOrb/weilai-cli.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "dependencies": {
+    "@weilai-cli/log": "file:../../utils/log",
+    "@weilai-cli/package": "file:../../models/package"
+  }
+}
