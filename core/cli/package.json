@@ -1,6 +1,6 @@
 {
   "name": "@weilai-cli/core",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "weilai-cli core",
   "author": "UOrb <798008773@qq.com>",
   "homepage": "",
@@ -23,11 +23,11 @@
     "test": "echo \"Error: run tests from root\""
   },
   "dependencies": {
+    "@weilai-cli/exec": "file:../exec",
     "@weilai-cli/get-npm-info": "file:../../utils/get-npm-info",
+    "@weilai-cli/init": "file:../../commands/init",
     "@weilai-cli/log": "file:../../utils/log",
     "@weilai-cli/utils": "file:../../utils/utils",
-    "@weilai-cli/init": "file:../../commands/init",
-    "@weilai-cli/exec": "file:../exec",
     "colors": "^1.4.0",
     "commander": "^6.2.1",
     "dedent": "^0.7.0",
