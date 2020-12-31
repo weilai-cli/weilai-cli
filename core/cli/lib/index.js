@@ -11,8 +11,6 @@ const pathExists = require('path-exists')
 const log = require("@weilai-cli/log")
 const { getNpmSemverVersions } = require('@weilai-cli/get-npm-info')
 
-const initCommandAction = require('@weilai-cli/init')
-
 const exec = require('@weilai-cli/exec')
 
 // require: .js/.json/.node
@@ -85,7 +83,6 @@ function registerCommand() {
 
 async function prepare() {
     checkPkgVersion()
-    checkNodeVersion()
     checkRoot()
     checkUserHome()
     checkEnv()
@@ -142,15 +139,6 @@ function checkUserHome() {
 // 检查登陆帐号的级别 以及 降级
 function checkRoot() {
     require('root-check')()
-}
-
-// 检查 node 的版本
-function checkNodeVersion() {
-    const currentNodeVersion = process.version
-    const lowestNodeVersion = constant.LOWEST_NODE_VERSION
-    if(!semver.gte(currentNodeVersion, lowestNodeVersion)) {
-        throw new Error(colors.red(`weilai-cli 需要安装 v${lowestNodeVersion} 以上版本的 Node.js`))
-    }
 }
 
 // 检查 package 的版本

@@ -1,5 +1,6 @@
 'use strict';
 
+const cp = require('child_process')
 const path = require('path')
 
 const log = require('@weilai-cli/log')
@@ -54,7 +55,51 @@ async function exec(...argm) {
     }
 
     const rootFile = pkg.getRootFile()
-    rootFile && require(rootFile)(...argm)
+    
+    if(rootFile) {
+        try {
+            // 当前进程
+            // rootFile && require(rootFile)(argm)
+            // 子进程
+            const o = Object.create(null)
+            Object.keys(cmdObj).forEach(key => {
+                if(
+                    cmdObj.hasOwnProperty(key) &&
+                    !key.startsWith('_') &&
+                    key !== 'parent'
+                ) {
+                    o[key] = cmdObj[key]
+                }
+            })
+            argm[argm.length - 1] = o
+            const code = `require('${rootFile}')(${JSON.stringify(argm)})`
+            const child = spawn('node', [ '-e', code ], {
+                cwd: process.cwd(),
+                stdio: 'inherit' // 这个属性是把子进程的输出流直接挂载到父进程
+            })
+    
+            child.on('error', e => {
+                log.error(e.message)
+                process.exit(1)
+            })
+    
+            child.on('exit', e => {
+                log.verbose('命令执行成功:', e)
+                process.exit(e)
+            })
+        } catch(err) {
+            log.error(err.message)
+        }
+    }
+}
+
+function spawn(command, args, options) {
+    const win32 = process.platform === 'win32'
+
+    const cmd = win32 ? 'cmd' : command
+    const cmdArgs = win32 ? ['/c'].concat(command, args) : args
+
+    return cp.spawn(cmd, cmdArgs, options || {})
 }
 
 module.exports = exec;
