@@ -24,7 +24,9 @@
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
   "dependencies": {
+    "@weilai-cli/command": "file:../../models/command",
     "@weilai-cli/log": "file:../../utils/log",
-    "@weilai-cli/command": "file:../../models/command"
+    "fs-extra": "^9.0.1",
+    "inquirer": "^7.3.3"
   }
 }
