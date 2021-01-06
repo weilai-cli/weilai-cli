@@ -27,6 +27,7 @@
     "@weilai-cli/command": "file:../../models/command",
     "@weilai-cli/log": "file:../../utils/log",
     "fs-extra": "^9.0.1",
-    "inquirer": "^7.3.3"
+    "inquirer": "^7.3.3",
+    "semver": "^7.3.4"
   }
 }
