@@ -8,6 +8,8 @@ const sermver = require('semver')
 const log = require("@weilai-cli/log")
 const Command = require('@weilai-cli/command')
 
+const getProjectTemplate = require('./getProjectTemplate')
+
 const TYPE_PROJECT = 'project'
 const TYPE_COMPONENT = 'component'
 
@@ -21,17 +23,14 @@ class initCommand extends Command {
 
     async exec() {
         try {
-            // init 的业务逻辑
-            log.verbose('init 的业务逻辑')
-
             // 1. 准备阶段
-            const projectInfo = await this.prepare()
+            const projectInfo = this.projectInfo = await this.prepare()
             log.verbose('projectInfo', projectInfo)
             if(projectInfo) {
                 // 2. 下载模板
+                this.downloadTemplate()
                 // 3. 安装模板
             }
-            
         } catch (e) {
             log.error(e.message)
         }
@@ -40,6 +39,14 @@ class initCommand extends Command {
     // 准备阶段
     async prepare() {
         const localPath = process.cwd()
+
+        // 0. 判断项目模板是否存在
+        const template = this.template = await getProjectTemplate()
+        log.verbose('template', template)
+        if(!Array.isArray(template) || template.length === 0) {
+            throw new Error('项目模板不存在')
+        }
+
         // 1. 判断当前目录是否为空
         if(!this.isCwdEmpty(localPath)) {
             // 2. 询问是否启动强制更新
@@ -91,6 +98,7 @@ class initCommand extends Command {
                 { name: '组件', value: TYPE_COMPONENT}
             ]
         })
+
         // 2. 获取项目的基本信息
         if(type === TYPE_PROJECT) {
             const project = await inquirer.prompt([{
@@ -134,6 +142,11 @@ class initCommand extends Command {
 
                     return v
                 }
+            }, {
+                type: 'list',
+                name: 'projectTemplate',
+                message: '请选择项目模板',
+                choices: this.createTemplateChoice()
             }])
 
             projectInfo = {
@@ -145,6 +158,10 @@ class initCommand extends Command {
         }
 
         return projectInfo
+    }
+
+    createTemplateChoice() {
+        return this.template.map(item => ({ name: item.name, value: item.npmName }))
     }
 
     // 下载模板

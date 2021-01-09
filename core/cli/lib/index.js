@@ -108,14 +108,11 @@ async function checkGlobalUpdate() {
 // 环境变量检查
 function checkEnv() {
     const dotenv = require('dotenv')
-    const dotenvPath = path.resolve(userHome, '.env')
+    const dotenvPath = path.resolve(userHome, '.weilairc')
     if(pathExists(dotenvPath)) {
         config = dotenv.config({ path: dotenvPath })
     }
-    
     createDefaultConfig()
-    
-    log.verbose('环境变量:', process.env.CLI_HOME_PATH)
 }
 
 // 创建默认的环境变量配置

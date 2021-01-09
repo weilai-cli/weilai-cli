@@ -1,7 +1,7 @@
 {
-  "name": "@weilai-cli/init",
-  "version": "1.0.12",
-  "description": "weilai-cli command init",
+  "name": "@weilai-cli/request",
+  "version": "1.0.0",
+  "description": "weilai-cli request",
   "author": "UOrb <798008773@qq.com>",
   "homepage": "",
   "license": "ISC",
@@ -24,11 +24,6 @@
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
   "dependencies": {
-    "@weilai-cli/command": "file:../../models/command",
-    "@weilai-cli/log": "file:../../utils/log",
-    "@weilai-cli/request": "file:../../utils/request",
-    "fs-extra": "^9.0.1",
-    "inquirer": "^7.3.3",
-    "semver": "^7.3.4"
+    "axios": "^0.21.1"
   }
 }
