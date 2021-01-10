@@ -18,5 +18,8 @@
   },
   "scripts": {
     "test": "echo \"Error: run tests from root\""
+  },
+  "dependencies": {
+    "cli-spinner": "^0.2.10"
   }
 }

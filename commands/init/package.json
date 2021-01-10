@@ -25,10 +25,13 @@
   },
   "dependencies": {
     "@weilai-cli/command": "file:../../models/command",
+    "@weilai-cli/package": "file:../../models/package",
     "@weilai-cli/log": "file:../../utils/log",
+    "@weilai-cli/utils": "file:../../utils/utils",
     "@weilai-cli/request": "file:../../utils/request",
     "fs-extra": "^9.0.1",
     "inquirer": "^7.3.3",
-    "semver": "^7.3.4"
+    "semver": "^7.3.4",
+    "user-home": "^2.0.0"
   }
 }

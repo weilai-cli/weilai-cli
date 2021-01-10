@@ -1,12 +1,17 @@
 'use strict';
 
 const fs = require('fs')
+const path = require('path')
+
 const fsExtra = require('fs-extra')
 const inquirer = require('inquirer')
 const sermver = require('semver')
+const userHome = require('user-home')
 
 const log = require("@weilai-cli/log")
 const Command = require('@weilai-cli/command')
+const Package = require('@weilai-cli/package')
+const { spinnerStart, sleep } = require('@weilai-cli/utils')
 
 const getProjectTemplate = require('./getProjectTemplate')
 
@@ -28,7 +33,7 @@ class initCommand extends Command {
             log.verbose('projectInfo', projectInfo)
             if(projectInfo) {
                 // 2. 下载模板
-                this.downloadTemplate()
+                await this.downloadTemplate()
                 // 3. 安装模板
             }
         } catch (e) {
@@ -165,12 +170,37 @@ class initCommand extends Command {
     }
 
     // 下载模板
-    downloadTemplate() {
-        // 1. 通过项目模板 API 获取项目模板信息
-        // 1.1 通过 egg.js 搭建一套后端系统
-        // 1.2 通过 npm 存储项目模板
-        // 1.3 将项目模板信息存储到 mongodb 数据库
-        // 1.4 通过 egg.js 获取 mongodb 中的数据冰倩通过 API 返回
+    async downloadTemplate() {
+        const { projectTemplate } = this.projectInfo
+        const templateInfo = this.template.find(item => item.npmName === projectTemplate)
+        const targetPath = path.resolve(userHome, '.weilai-cli', 'template')
+        const storePath = path.resolve(userHome, '.weilai-cli', 'template', 'node_modules')
+        const { npmName: packageName, version: packageVersion } = templateInfo
+        const templateNpm = new Package({
+            targetPath,
+            storePath,
+            packageName,
+            packageVersion
+        })
+
+        // 判断 package 是否存在
+        const spinner = spinnerStart('正在下载模板...')
+        await sleep()
+        try {
+            if(!await templateNpm.exists()) {
+                // 不存在 安装
+                await templateNpm.install()
+                log.notice('下载模板成功')
+            } else {
+                // 存在 更新
+                await templateNpm.update()
+                log.notice('更新模板成功')
+            }
+        } catch (e) {
+            throw e
+        } finally {
+            spinner.stop(true)
+        }
     }
 
     // 判断当前目录是否为空

@@ -60,7 +60,6 @@ class Package {
     async exists() {
         if(this.storePath) {
             await this.prepare()
-            console.log('cacheFilePath', this.cacheFilePath)
             return pathExists.sync(this.cacheFilePath)
         } else {
             return pathExists.sync(this.targetPath)
