@@ -185,6 +185,7 @@ class initCommand extends Command {
 
         // 判断 package 是否存在
         const spinner = spinnerStart('正在下载模板...')
+        
         await sleep()
         try {
             if(!await templateNpm.exists()) {
