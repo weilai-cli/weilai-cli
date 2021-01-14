@@ -190,11 +190,11 @@ class initCommand extends Command {
             if(!await templateNpm.exists()) {
                 // 不存在 安装
                 await templateNpm.install()
-                log.notice('下载模板成功!')
+                log.notice('下载模板成功')
             } else {
                 // 存在 更新
                 await templateNpm.update()
-                log.notice('更新模板成功!')
+                log.notice('更新模板成功')
             }
         } catch (e) {
             throw e
