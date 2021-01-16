@@ -121,71 +121,102 @@ class initCommand extends Command {
             ]
         })
 
+        log.verbose('project class', type)
+        const title = type === TYPE_PROJECT ? '项目' : '组件'
+        this.template = this.template.filter(template => template.tag.includes(type))
+
+        const projectPrompt = [
+            {
+                type: 'input',
+                name: 'projectName',
+                message: `请输入${title}名称`,
+                default: this.projectName ? this.projectName : '',
+                validate: function(v) {
+                    const done = this.async()
+                    setTimeout(() => {
+                        // 1. 首字符必须为英文
+                        // 2. 尾字符必须为英文和数字
+                        // 3. 字符仅允许'-_'
+                        if(!isValidName(v)) {
+                            return done(`请输入合法的${title}名称`)
+                        }
+                        done(null, true)
+                    })
+                },
+                filter: (v) => {
+                    return v
+                }
+            },
+            {
+                type: 'input',
+                name: 'projectVersion',
+                message: `请输入${title}版本号`,
+                default: '1.0.0',
+                validate: function(v) {
+                    const done = this.async()
+                    setTimeout(() => {
+                        if(!sermver.valid(v)) {
+                            return done(`请输入合法的版本号`)
+                        }
+                        done(null, true)
+                    })
+                },
+                filter: (v) => {
+                    if(!!sermver.valid(v)) {
+                        return sermver.valid(v)
+                    }
+
+                    return v
+                }
+            }, {
+                type: 'list',
+                name: 'projectTemplate',
+                message: `请选择${title}模板`,
+                choices: this.createTemplateChoice()
+            }
+        ]
+
         // 2. 获取项目的基本信息
         if(type === TYPE_PROJECT) {
 
-            const project = await inquirer.prompt([
-                {
-                    type: 'input',
-                    name: 'projectName',
-                    message: '请输入项目名称',
-                    default: this.projectName ? this.projectName : '',
-                    validate: function(v) {
-                        const done = this.async()
-                        setTimeout(() => {
-                            // 1. 首字符必须为英文
-                            // 2. 尾字符必须为英文和数字
-                            // 3. 字符仅允许'-_'
-                            if(!isValidName(v)) {
-                                return done('请输入合法的项目名称')
-                            }
-                            done(null, true)
-                        })
-                    },
-                    filter: (v) => {
-                        return v
-                    }
-                },
-                {
-                    type: 'input',
-                    name: 'projectVersion',
-                    message: '请输入项目版本号',
-                    default: '1.0.0',
-                    validate: function(v) {
-                        const done = this.async()
-                        setTimeout(() => {
-                            if(!sermver.valid(v)) {
-                                return done('请输入合法的版本号')
-                            }
-                            done(null, true)
-                        })
-                    },
-                    filter: (v) => {
-                        if(!!sermver.valid(v)) {
-                            return sermver.valid(v)
-                        }
-
-                        return v
-                    }
-                }, {
-                    type: 'list',
-                    name: 'projectTemplate',
-                    message: '请选择项目模板',
-                    choices: this.createTemplateChoice()
-                }
-            ])
-
-            if(project.projectName) {
-                project.name = require('kebab-case')(project.projectName).replace(/^-/, '')
-            }
-            
-            if(project.projectVersion) {
-                project.version = project.projectVersion
-            }
+            const project = await inquirer.prompt(projectPrompt)
 
             projectInfo = { type, ...projectInfo, ...project }
         } else if(type === TYPE_COMPONENT) {
+            const descriptionPrompt = {
+                type: 'input',
+                name: 'componentDescription',
+                message: '请输入组件描述信息',
+                default: '',
+                validate: function(v) {
+                    const done = this.async()
+                    setTimeout(() => {
+                        if(!(v)) {
+                            return done('请输入组件描述信息')
+                        }
+                        done(null, true)
+                    })
+                }
+            }
 
+            projectPrompt.push(descriptionPrompt)
+
+            const project = await inquirer.prompt(projectPrompt)
+
+            projectInfo = { type, ...projectInfo, ...project }
+        }
+
+        
+        if(projectInfo.projectName) {
+            projectInfo.name = require('kebab-case')(projectInfo.projectName).replace(/^-/, '')
+        }
+        
+        if(projectInfo.projectVersion) {
+            projectInfo.version = projectInfo.projectVersion
+        }
+
+        if(projectInfo.componentDescription) {
+            projectInfo.description = projectInfo.componentDescription
         }
 
         return projectInfo
@@ -267,7 +298,8 @@ class initCommand extends Command {
             log.success('模板安装成功')
         }
 
-        const ignore = ['node_modules/**', 'public/**']
+        const templateIgnore = this.templateInfo.ignore || []
+        const ignore = ['**/node_modules/**', ...templateIgnore]
         await this.ejsRender({ignore})
 
         const { installCommand, startCommand } = this.templateInfo
