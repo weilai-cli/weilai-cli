@@ -11,7 +11,7 @@ const userHome = require('user-home')
 const log = require("@weilai-cli/log")
 const Command = require('@weilai-cli/command')
 const Package = require('@weilai-cli/package')
-const { spinnerStart, sleep, spawn } = require('@weilai-cli/utils')
+const { spinnerStart, sleep, spawnAsync } = require('@weilai-cli/utils')
 
 const getProjectTemplate = require('./getProjectTemplate')
 
@@ -19,6 +19,7 @@ const TYPE_PROJECT = 'project'
 const TYPE_COMPONENT = 'component'
 const TEMPLATE_TYPE_NORMAL = 'normal'
 const TEMPLATE_TYPE_CUSTOM = 'custom'
+const WHITE_COMMAND = ['npm', 'cnpm']
 
 class initCommand extends Command {
     init() {
@@ -159,6 +160,7 @@ class initCommand extends Command {
 
             projectInfo = {
                 type,
+                className: require('kebab-case')(projectInfo.projectName),
                 ...project
             }
         } else if(type === TYPE_COMPONENT) {
@@ -168,6 +170,7 @@ class initCommand extends Command {
         return projectInfo
     }
 
+    // 创建模板的选择列表
     createTemplateChoice() {
         return this.template.map(item => ({ name: item.name, value: item.npmName }))
     }
@@ -244,20 +247,48 @@ class initCommand extends Command {
         }
 
         const { installCommand, startCommand } = this.templateInfo
+        let installCmdRet, startCmdRet
 
         // 依赖安装
-        if(installCommand) {
-            const installCmd = installCommand.split(' ')
-            const cmd = installCmd[0]
-            const args = installCmd.splice(1)
-            console.log(cmd, args)
-        }
+        await this.execCommand(installCommand, '依赖安装失败')
+
         // 启动命令执行
+        await this.execCommand(startCommand, '启动命令执行失败')
     }
 
     // 自定义安装
     async installCustomTemplate() {
         log.verbose('安装自定义模板') 
+    }
+
+    // 执行命令
+    async execCommand(command, errMsg) {
+        if(command) {
+            const cmdOptions = command.split(' ')
+            const cmd = this.checkCommand(cmdOptions[0])
+            const args = cmdOptions.splice(1)
+            const ret = await spawnAsync(cmd, args, {
+                stdio: 'inherit',
+                cwd: process.cwd()
+            })
+
+            if(ret !== 0) {
+                throw new Error(errMsg)
+            }
+
+            return ret
+        }
+
+        throw new Error(`命令不存在`)
+    }
+
+    // 验证命令
+    checkCommand(cmd) {
+        if(WHITE_COMMAND.includes(cmd)) {
+            return cmd
+        }
+
+        throw new Error(`非法命令：${ cmd }`)
     }
 
     // 判断当前目录是否为空

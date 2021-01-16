@@ -31,6 +31,7 @@
     "@weilai-cli/utils": "file:../../utils/utils",
     "fs-extra": "^9.0.1",
     "inquirer": "^7.3.3",
+    "kebab-case": "^1.0.0",
     "semver": "^7.3.4",
     "user-home": "^2.0.0"
   }

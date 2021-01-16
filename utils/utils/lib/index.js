@@ -31,11 +31,20 @@ function spawn(command, args, options) {
     return cp.spawn(cmd, cmdArgs, options || {})
 }
 
+function spawnAsync(command, args, options) {
+    return new Promise((resolve, reject) => {
+        const p = spawn(command, args, options)
+        p.on('error', e => reject(e))
+        p.on('exit', c => resolve(c))
+    })
+}
+
 module.exports = {
     isObject,
     isArray,
     spinnerStart,
     sleep,
-    spawn
+    spawn,
+    spawnAsync
 };
 
