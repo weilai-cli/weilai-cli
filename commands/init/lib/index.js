@@ -7,6 +7,8 @@ const fsExtra = require('fs-extra')
 const inquirer = require('inquirer')
 const sermver = require('semver')
 const userHome = require('user-home')
+const glob = require('glob')
+const ejs = require('ejs')
 
 const log = require("@weilai-cli/log")
 const Command = require('@weilai-cli/command')
@@ -42,6 +44,9 @@ class initCommand extends Command {
             }
         } catch (e) {
             log.error(e.message)
+            if(process.env.LOG_LEVEL === 'verbose') {
+                console.log(e)
+            }
         }
     }
 
@@ -50,7 +55,9 @@ class initCommand extends Command {
         const localPath = process.cwd()
 
         // 0. 判断项目模板是否存在
+        const spinner = spinnerStart('正在获取模板信息...')
         const template = this.template = await getProjectTemplate()
+        spinner.stop(true)
         log.verbose('template', template)
         if(!Array.isArray(template) || template.length === 0) {
             throw new Error('项目模板不存在')
@@ -83,7 +90,9 @@ class initCommand extends Command {
 
                 if(confirmDelete) {
                     // 清空当前目录
+                    const spinner = spinnerStart('正在清空当前目录...')
                     fsExtra.emptyDirSync(localPath)
+                    spinner.stop(true)
                 }
             }
         }
@@ -94,6 +103,10 @@ class initCommand extends Command {
 
     // 获取项目信息
     async getProjectInfo() {
+        function isValidName(v) {
+            return /^[a-zA-Z]+([-][a-zA-Z][a-zA-Z0-9]*|[_][a-zA-Z][a-zA-Z0-9]*|[a-zA-Z0-9])*$/.test(v)
+        }
+
         let projectInfo = {}
 
         // 1. 选择创建项目或者组件
@@ -110,59 +123,67 @@ class initCommand extends Command {
 
         // 2. 获取项目的基本信息
         if(type === TYPE_PROJECT) {
-            const project = await inquirer.prompt([{
-                type: 'input',
-                name: 'projectName',
-                message: '请输入项目名称',
-                default: '',
-                validate: function(v) {
-                    const done = this.async()
-                    setTimeout(() => {
-                        // 1. 首字符必须为英文
-                        // 2. 尾字符必须为英文和数字
-                        // 3. 字符仅允许'-_'
-                        if(!/^[a-zA-Z]+([-][a-zA-Z][a-zA-Z0-9]*|[_][a-zA-Z][a-zA-Z0-9]*|[a-zA-Z0-9])*$/.test(v)) {
-                            return done('请输入合法的项目名称')
-                        }
-                        done(null, true)
-                    })
-                },
-                filter: (v) => {
-                    return v
-                }
-            }, {
-                type: 'input',
-                name: 'projectVersion',
-                message: '请输入项目版本号',
-                default: '1.0.0',
-                validate: function(v) {
-                    const done = this.async()
-                    setTimeout(() => {
-                        if(!sermver.valid(v)) {
-                            return done('请输入合法的版本号')
-                        }
-                        done(null, true)
-                    })
-                },
-                filter: (v) => {
-                    if(!!sermver.valid(v)) {
-                        return sermver.valid(v)
+
+            const project = await inquirer.prompt([
+                {
+                    type: 'input',
+                    name: 'projectName',
+                    message: '请输入项目名称',
+                    default: this.projectName ? this.projectName : '',
+                    validate: function(v) {
+                        const done = this.async()
+                        setTimeout(() => {
+                            // 1. 首字符必须为英文
+                            // 2. 尾字符必须为英文和数字
+                            // 3. 字符仅允许'-_'
+                            if(!isValidName(v)) {
+                                return done('请输入合法的项目名称')
+                            }
+                            done(null, true)
+                        })
+                    },
+                    filter: (v) => {
+                        return v
                     }
+                },
+                {
+                    type: 'input',
+                    name: 'projectVersion',
+                    message: '请输入项目版本号',
+                    default: '1.0.0',
+                    validate: function(v) {
+                        const done = this.async()
+                        setTimeout(() => {
+                            if(!sermver.valid(v)) {
+                                return done('请输入合法的版本号')
+                            }
+                            done(null, true)
+                        })
+                    },
+                    filter: (v) => {
+                        if(!!sermver.valid(v)) {
+                            return sermver.valid(v)
+                        }
 
-                    return v
+                        return v
+                    }
+                }, {
+                    type: 'list',
+                    name: 'projectTemplate',
+                    message: '请选择项目模板',
+                    choices: this.createTemplateChoice()
                 }
-            }, {
-                type: 'list',
-                name: 'projectTemplate',
-                message: '请选择项目模板',
-                choices: this.createTemplateChoice()
-            }])
+            ])
 
-            projectInfo = {
-                type,
-                className: require('kebab-case')(projectInfo.projectName),
-                ...project
+            if(project.projectName) {
+                project.name = require('kebab-case')(project.projectName).replace(/^-/, '')
             }
+            
+            if(project.projectVersion) {
+                project.version = project.projectVersion
+            }
+
+            projectInfo = { type, ...projectInfo, ...project }
         } else if(type === TYPE_COMPONENT) {
 
         }
@@ -246,6 +267,9 @@ class initCommand extends Command {
             log.success('模板安装成功')
         }
 
+        const ignore = ['node_modules/**', 'public/**']
+        await this.ejsRender({ignore})
+
         const { installCommand, startCommand } = this.templateInfo
         let installCmdRet, startCmdRet
 
@@ -280,6 +304,41 @@ class initCommand extends Command {
         }
 
         throw new Error(`命令不存在`)
+    }
+
+    // ejs
+    async ejsRender(options) {
+        return new Promise((resolve1, reject1) => {
+            const cwd = process.cwd()
+            glob('**', {
+                cwd: cwd,
+                ignore: options.ignore,
+                nodir: true
+            }, (err, files) => {
+                if(err) {
+                    reject1(err)
+                }
+
+                Promise.all(files.map(file => {
+                    const filePath = path.join(cwd, file)
+                    return new Promise((resolve2, reject2) => {
+                        ejs.renderFile(filePath, this.projectInfo, {}, (err, result) => {
+                            if(err) {
+                                reject2(err)
+                            }
+
+                            fsExtra.writeFileSync(filePath, result)
+                            resolve2(result)
+                        })
+                    })
+                    console.log(filePath)
+                })).then(() => {
+                    resolve1()
+                }).catch(err => {
+                    reject1(err)
+                })
+            })
+        })
     }
 
     // 验证命令

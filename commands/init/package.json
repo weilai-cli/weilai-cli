@@ -29,6 +29,7 @@
     "@weilai-cli/package": "file:../../models/package",
     "@weilai-cli/request": "file:../../utils/request",
     "@weilai-cli/utils": "file:../../utils/utils",
+    "ejs": "^3.1.5",
     "fs-extra": "^9.0.1",
     "inquirer": "^7.3.3",
     "kebab-case": "^1.0.0",

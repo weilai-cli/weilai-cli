@@ -97,8 +97,8 @@ class Package {
                     version: latestPackageVersion
                 }]
             })
-            this.packageVersion = latestPackageVersion
         }
+        this.packageVersion = latestPackageVersion
     }
 
     // 获取入口文件
