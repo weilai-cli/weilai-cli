@@ -11,12 +11,14 @@ const userHome = require('user-home')
 const log = require("@weilai-cli/log")
 const Command = require('@weilai-cli/command')
 const Package = require('@weilai-cli/package')
-const { spinnerStart, sleep } = require('@weilai-cli/utils')
+const { spinnerStart, sleep, spawn } = require('@weilai-cli/utils')
 
 const getProjectTemplate = require('./getProjectTemplate')
 
 const TYPE_PROJECT = 'project'
 const TYPE_COMPONENT = 'component'
+const TEMPLATE_TYPE_NORMAL = 'normal'
+const TEMPLATE_TYPE_CUSTOM = 'custom'
 
 class initCommand extends Command {
     init() {
@@ -35,6 +37,7 @@ class initCommand extends Command {
                 // 2. 下载模板
                 await this.downloadTemplate()
                 // 3. 安装模板
+                await this.installTemplate()
             }
         } catch (e) {
             log.error(e.message)
@@ -172,11 +175,11 @@ class initCommand extends Command {
     // 下载模板
     async downloadTemplate() {
         const { projectTemplate } = this.projectInfo
-        const templateInfo = this.template.find(item => item.npmName === projectTemplate)
+        this.templateInfo = this.template.find(item => item.npmName === projectTemplate)
         const targetPath = path.resolve(userHome, '.weilai-cli', 'template')
         const storePath = path.resolve(userHome, '.weilai-cli', 'template', 'node_modules')
-        const { npmName: packageName, version: packageVersion } = templateInfo
-        const templateNpm = new Package({
+        const { npmName: packageName, version: packageVersion } = this.templateInfo
+        const templateNpm = this.templateNpm = new Package({
             targetPath,
             storePath,
             packageName,
@@ -184,23 +187,77 @@ class initCommand extends Command {
         })
 
         // 判断 package 是否存在
+        let flag = await templateNpm.exists()
         const spinner = spinnerStart('正在下载模板...')
         await sleep()
         try {
-            if(!await templateNpm.exists()) {
+            if(!flag) {
                 // 不存在 安装
                 await templateNpm.install()
-                log.notice('下载模板成功')
             } else {
                 // 存在 更新
                 await templateNpm.update()
-                log.notice('更新模板成功')
             }
         } catch (e) {
             throw e
         } finally {
             spinner.stop(true)
+            flag ? log.success('更新模板成功') : log.success('下载模板成功')
         }
+    }
+
+    // 安装模板
+    async installTemplate() {
+        if(this.templateInfo) {
+            if(this.templateInfo.type === TEMPLATE_TYPE_NORMAL) {
+                // 标准安装
+                await this.installNormalTemplate()
+            } else if(this.templateInfo.type === TEMPLATE_TYPE_CUSTOM) {
+                // 自定义安装
+                await this.installCustomTemplate()
+            } else {
+                throw new Error('项目模板信息类型无法识别')
+            }
+        } else {
+            throw new Error('项目模板信息不存在')
+        }
+    }
+
+    // 标准安装
+    async installNormalTemplate() {
+        log.verbose('安装标准模板')
+        log.verbose('templateNpm', this.templateNpm)
+        // 拷贝模板代码到当前目录
+        const spinner = spinnerStart('正在安装模板...')
+        const templatePath = path.resolve(this.templateNpm.cacheFilePath, 'template')
+        const targetPath = process.cwd()
+        await sleep()
+        try {
+            fsExtra.ensureDirSync(templatePath) // 确保目录存在
+            fsExtra.ensureDirSync(targetPath) // 确保目录存在
+            fsExtra.copySync(templatePath, targetPath) // 拷贝到 targetPath 目录下
+        } catch (e) {
+            throw e
+        } finally {
+            spinner.stop(true)
+            log.success('模板安装成功')
+        }
+
+        const { installCommand, startCommand } = this.templateInfo
+
+        // 依赖安装
+        if(installCommand) {
+            const installCmd = installCommand.split(' ')
+            const cmd = installCmd[0]
+            const args = installCmd.splice(1)
+            console.log(cmd, args)
+        }
+        // 启动命令执行
+    }
+
+    // 自定义安装
+    async installCustomTemplate() {
+        log.verbose('安装自定义模板') 
     }
 
     // 判断当前目录是否为空

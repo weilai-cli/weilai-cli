@@ -1,9 +1,9 @@
 'use strict';
 
-const cp = require('child_process')
 const path = require('path')
 
 const log = require('@weilai-cli/log')
+const { spawn } = require('@weilai-cli/utils')
 const Package = require('@weilai-cli/package')
 
 const SETTINGS = {
@@ -91,15 +91,6 @@ async function exec(...argm) {
             log.error(err.message)
         }
     }
-}
-
-function spawn(command, args, options) {
-    const win32 = process.platform === 'win32'
-
-    const cmd = win32 ? 'cmd' : command
-    const cmdArgs = win32 ? ['/c'].concat(command, args) : args
-
-    return cp.spawn(cmd, cmdArgs, options || {})
 }
 
 module.exports = exec;

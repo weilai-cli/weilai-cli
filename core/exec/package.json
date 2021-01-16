@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "@weilai-cli/log": "file:../../utils/log",
+    "@weilai-cli/utils": "file:../../utils/utils",
     "@weilai-cli/package": "file:../../models/package"
   }
 }
