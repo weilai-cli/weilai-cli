@@ -1,6 +1,6 @@
 {
   "name": "@weilai-cli/exec",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "description": "weilai-cli exec",
   "author": "UOrb <798008773@qq.com>",
   "homepage": "",
@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "@weilai-cli/log": "file:../../utils/log",
-    "@weilai-cli/utils": "file:../../utils/utils",
-    "@weilai-cli/package": "file:../../models/package"
+    "@weilai-cli/package": "file:../../models/package",
+    "@weilai-cli/utils": "file:../../utils/utils"
   }
 }
