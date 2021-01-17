@@ -37,7 +37,7 @@ class Package {
         }
 
         if(this.packageVersion === 'latest') {
-            this.packageVersion = await getNpmLatestVersion(this.packageVersion)
+            this.packageVersion = await getNpmLatestVersion(this.packageName)
         }
     }
 
@@ -67,8 +67,9 @@ class Package {
     }
 
     // 安装 package
-    install() {
-        npminstall({
+    async install() {
+        await this.prepare();
+        return npminstall({
             root: this.targetPath,
             storeDir: this.storePath,
             registry: getDefaultRegistry(),
@@ -88,7 +89,7 @@ class Package {
         const latestFilePath = this.getSpecificCacheFilePath(latestPackageVersion)
         // 3. 如果不存在，则直接安装最新版本
         if(!pathExists.sync(latestFilePath)) {
-            npminstall({
+            await npminstall({
                 root: this.targetPath,
                 storeDir: this.storePath,
                 registry: getDefaultRegistry(),
@@ -119,7 +120,7 @@ class Package {
         }
 
         return this.storePath
-            ? _getRootFile(this.storePath)
+            ? _getRootFile(this.cacheFilePath)
             : _getRootFile(this.targetPath)
     }
 }

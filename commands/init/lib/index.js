@@ -315,6 +315,26 @@ class initCommand extends Command {
     // 自定义安装
     async installCustomTemplate() {
         log.verbose('安装自定义模板') 
+        log.verbose('templateNpm', this.templateNpm)
+        if(await this.templateNpm.exists()) {
+            const rootFile = this.templateNpm.getRootFile()
+            log.verbose('rootFile', rootFile)
+            if(fs.existsSync(rootFile)) {
+                log.notice('开始执行自定义模板安装')
+                const templatePath = path.resolve(this.templateNpm.cacheFilePath, 'template')
+                const options = { 
+                    targetPath: process.cwd(), 
+                    sourcePath: templatePath, 
+                    templateInfo: this.templateInfo, 
+                    projectInfo: this.projectInfo 
+                }
+                const code = `require('${rootFile}')(${JSON.stringify(options)})`
+                await spawnAsync('node', ['-e', code], { stdio: 'inherit', cwd: process.cwd()})
+                log.success('自定义模板安装成功')
+            } else {
+                throw new Error('自定义模板入口文件不存在！')
+            }
+        }
     }
 
     // 执行命令
@@ -340,11 +360,11 @@ class initCommand extends Command {
 
     // ejs
     async ejsRender(options) {
+        const cwd = process.cwd()
         return new Promise((resolve1, reject1) => {
-            const cwd = process.cwd()
             glob('**', {
                 cwd: cwd,
-                ignore: options.ignore,
+                ignore: options.ignore || '',
                 nodir: true
             }, (err, files) => {
                 if(err) {
@@ -363,7 +383,6 @@ class initCommand extends Command {
                             resolve2(result)
                         })
                     })
-                    console.log(filePath)
                 })).then(() => {
                     resolve1()
                 }).catch(err => {
