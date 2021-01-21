@@ -3,7 +3,7 @@
 const axios = require('axios')
 const BASE_URL = process.env.WEILAI_CLI_BASE_URL 
     ? process.env.WEILAI_CLI_BASE_URL
-    : 'http://127.0.0.1:7001/'
+    : 'http://81.68.79.84:7001/'
 
 const request = axios.create({
     baseURL: BASE_URL,
